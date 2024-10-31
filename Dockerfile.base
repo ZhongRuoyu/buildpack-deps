@@ -16,7 +16,10 @@ RUN <<RUN
 RUN
 
 RUN <<RUN
-  echo '/usr/local/lib64' >> /etc/ld.so.conf.d/local.conf
+  {
+    echo '/usr/local/lib'
+    echo '/usr/local/lib64'
+  } > /etc/ld.so.conf.d/00-local-lib.conf
   ldconfig
 RUN
 
