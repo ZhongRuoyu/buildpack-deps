@@ -23,8 +23,14 @@ RUN
 RUN <<RUN
   set -eux
   mkdir -p /usr/local/src/gcc-9
-  curl -fsSL "https://ftpmirror.gnu.org/gnu/gcc/gcc-9.5.0/gcc-9.5.0.tar.gz" |
-    tar -C /usr/local/src/gcc-9 -xz --strip-components=1
+  curl -fsSL "https://ftpmirror.gnu.org/gnu/gcc/gcc-9.5.0/gcc-9.5.0.tar.gz" \
+    -o "/tmp/gcc-9.5.0.tar.gz"
+  echo "15b34072105272a3eb37f6927409f7ce9aa0dd1498efebc35f851d6e6f029a4d  /tmp/gcc-9.5.0.tar.gz" |
+    sha256sum -c
+  tar \
+    -C /usr/local/src/gcc-9 \
+    -xzf "/tmp/gcc-9.5.0.tar.gz" \
+    --strip-components=1
   cd /usr/local/src/gcc-9
   ./contrib/download_prerequisites
   mkdir -p /tmp/gcc-9
@@ -36,15 +42,25 @@ RUN <<RUN
   make -j "$(nproc)"
   make -j "$(nproc)" install
   cd /
-  rm -rf /usr/local/src/gcc-9 /tmp/gcc-9
+  rm -rf \
+    "/tmp/gcc-9.5.0.tar.gz" \
+    /usr/local/src/gcc-9 \
+    /tmp/gcc-9
 RUN
 
 ARG GCC_VERSION
+ARG GCC_SHA256
 RUN <<RUN
   set -eux
   mkdir -p /usr/local/src/gcc
-  curl -fsSL "https://ftpmirror.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.gz" |
-    tar -C /usr/local/src/gcc -xz --strip-components=1
+  curl -fsSL "https://ftpmirror.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.gz" \
+    -o "/tmp/gcc-${GCC_VERSION}.tar.gz"
+  echo "${GCC_SHA256}  /tmp/gcc-${GCC_VERSION}.tar.gz" |
+    sha256sum -c
+  tar \
+    -C /usr/local/src/gcc \
+    -xzf "/tmp/gcc-${GCC_VERSION}.tar.gz" \
+    --strip-components=1
   cd /usr/local/src/gcc
   ./contrib/download_prerequisites
   mkdir -p /tmp/gcc
@@ -59,16 +75,26 @@ RUN <<RUN
   make -j "$(nproc)"
   make -j "$(nproc)" install
   cd /
-  rm -rf /usr/local/src/gcc /tmp/gcc
+  rm -rf \
+    "/tmp/gcc-${GCC_VERSION}.tar.gz" \
+    /usr/local/src/gcc \
+    /tmp/gcc
   ldconfig
 RUN
 
 ARG MAKE_VERSION
+ARG MAKE_SHA256
 RUN <<RUN
   set -eux
   mkdir -p /usr/local/src/make
-  curl -fsSL "https://ftpmirror.gnu.org/gnu/make/make-${MAKE_VERSION}.tar.gz" |
-    tar -C /usr/local/src/make -xz --strip-components=1
+  curl -fsSL "https://ftpmirror.gnu.org/gnu/make/make-${MAKE_VERSION}.tar.gz" \
+    -o "/tmp/make-${MAKE_VERSION}.tar.gz"
+  echo "${MAKE_SHA256}  /tmp/make-${MAKE_VERSION}.tar.gz" |
+    sha256sum -c
+  tar \
+    -C /usr/local/src/make \
+    -xzf "/tmp/make-${MAKE_VERSION}.tar.gz" \
+    --strip-components=1
   mkdir -p /tmp/make
   cd /tmp/make
   /usr/local/src/make/configure \
@@ -76,10 +102,14 @@ RUN <<RUN
   make -j "$(nproc)"
   make -j "$(nproc)" install
   cd /
-  rm -rf /usr/local/src/make /tmp/make
+  rm -rf \
+    "/tmp/make-${MAKE_VERSION}.tar.gz" \
+    /usr/local/src/make \
+    /tmp/make
 RUN
 
 ARG LINUX_HEADERS_VERSION
+ARG LINUX_HEADERS_SHA256
 RUN <<RUN
   set -eux
   apt-get update
@@ -87,22 +117,37 @@ RUN <<RUN
     rsync
   rm -rf /var/lib/apt/lists/*
   mkdir -p /usr/local/src/linux-headers
-  curl -fsSL "https://cdn.kernel.org/pub/linux/kernel/v${LINUX_HEADERS_VERSION%%.*}.x/linux-${LINUX_HEADERS_VERSION}.tar.gz" |
-    tar -C /usr/local/src/linux-headers -xz --strip-components=1
+  curl -fsSL "https://cdn.kernel.org/pub/linux/kernel/v${LINUX_HEADERS_VERSION%%.*}.x/linux-${LINUX_HEADERS_VERSION}.tar.gz" \
+    -o "/tmp/linux-${LINUX_HEADERS_VERSION}.tar.gz"
+  echo "${LINUX_HEADERS_SHA256}  /tmp/linux-${LINUX_HEADERS_VERSION}.tar.gz" |
+    sha256sum -c
+  tar \
+    -C /usr/local/src/linux-headers \
+    -xzf "/tmp/linux-${LINUX_HEADERS_VERSION}.tar.gz" \
+    --strip-components=1
   cd /usr/local/src/linux-headers
   make -j "$(nproc)" \
     headers_install \
     INSTALL_HDR_PATH=/usr/local
   cd /
-  rm -rf /usr/local/src/linux-headers
+  rm -rf \
+    "/tmp/linux-${LINUX_HEADERS_VERSION}.tar.gz" \
+    /usr/local/src/linux-headers
 RUN
 
 ARG BINUTILS_VERSION
+ARG BINUTILS_SHA256
 RUN <<RUN
   set -eux
   mkdir -p /usr/local/src/binutils
-  curl -fsSL "https://ftpmirror.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.gz" |
-    tar -C /usr/local/src/binutils -xz --strip-components=1
+  curl -fsSL "https://ftpmirror.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.gz" \
+    -o "/tmp/binutils-${BINUTILS_VERSION}.tar.gz"
+  echo "${BINUTILS_SHA256}  /tmp/binutils-${BINUTILS_VERSION}.tar.gz" |
+    sha256sum -c
+  tar \
+    -C /usr/local/src/binutils \
+    -xzf "/tmp/binutils-${BINUTILS_VERSION}.tar.gz" \
+    --strip-components=1
   mkdir -p /tmp/binutils
   cd /tmp/binutils
   /usr/local/src/binutils/configure \
@@ -110,5 +155,8 @@ RUN <<RUN
   make -j "$(nproc)"
   make -j "$(nproc)" install
   cd /
-  rm -rf /usr/local/src/binutils /tmp/binutils
+  rm -rf \
+    "/tmp/binutils-${BINUTILS_VERSION}.tar.gz" \
+    /usr/local/src/binutils \
+    /tmp/binutils
 RUN
