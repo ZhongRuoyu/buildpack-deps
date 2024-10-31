@@ -1,0 +1,114 @@
+# syntax=docker/dockerfile:1
+
+FROM debian/eol:wheezy
+
+RUN <<RUN
+  set -eux
+  apt-get update
+  apt-get upgrade -y
+  apt-get install -y --no-install-recommends \
+    build-essential \
+    ca-certificates \
+    curl \
+    gettext \
+    texinfo
+  rm -rf /var/lib/apt/lists/*
+RUN
+
+RUN <<RUN
+  echo '/usr/local/lib64' >> /etc/ld.so.conf.d/local.conf
+  ldconfig
+RUN
+
+RUN <<RUN
+  set -eux
+  mkdir -p /usr/local/src/gcc-9
+  curl -fsSL "https://ftpmirror.gnu.org/gnu/gcc/gcc-9.5.0/gcc-9.5.0.tar.gz" |
+    tar -C /usr/local/src/gcc-9 -xz --strip-components=1
+  cd /usr/local/src/gcc-9
+  ./contrib/download_prerequisites
+  mkdir -p /tmp/gcc-9
+  cd /tmp/gcc-9
+  /usr/local/src/gcc-9/configure \
+    --prefix=/usr/local/opt/gcc-9 \
+    --enable-languages=c,c++ \
+    --disable-multilib
+  make -j "$(nproc)"
+  make -j "$(nproc)" install
+  cd /
+  rm -rf /usr/local/src/gcc-9 /tmp/gcc-9
+RUN
+
+ARG GCC_VERSION
+RUN <<RUN
+  set -eux
+  mkdir -p /usr/local/src/gcc
+  curl -fsSL "https://ftpmirror.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.gz" |
+    tar -C /usr/local/src/gcc -xz --strip-components=1
+  cd /usr/local/src/gcc
+  ./contrib/download_prerequisites
+  mkdir -p /tmp/gcc
+  cd /tmp/gcc
+  env \
+    CC=/usr/local/opt/gcc-9/bin/gcc \
+    CXX=/usr/local/opt/gcc-9/bin/g++ \
+    /usr/local/src/gcc/configure \
+    --prefix=/usr/local \
+    --enable-languages=c,c++ \
+    --disable-multilib
+  make -j "$(nproc)"
+  make -j "$(nproc)" install
+  cd /
+  rm -rf /usr/local/src/gcc /tmp/gcc
+  ldconfig
+RUN
+
+ARG MAKE_VERSION
+RUN <<RUN
+  set -eux
+  mkdir -p /usr/local/src/make
+  curl -fsSL "https://ftpmirror.gnu.org/gnu/make/make-${MAKE_VERSION}.tar.gz" |
+    tar -C /usr/local/src/make -xz --strip-components=1
+  mkdir -p /tmp/make
+  cd /tmp/make
+  /usr/local/src/make/configure \
+    --prefix=/usr/local
+  make -j "$(nproc)"
+  make -j "$(nproc)" install
+  cd /
+  rm -rf /usr/local/src/make /tmp/make
+RUN
+
+ARG LINUX_HEADERS_VERSION
+RUN <<RUN
+  set -eux
+  apt-get update
+  apt-get install -y --no-install-recommends \
+    rsync
+  rm -rf /var/lib/apt/lists/*
+  mkdir -p /usr/local/src/linux-headers
+  curl -fsSL "https://cdn.kernel.org/pub/linux/kernel/v${LINUX_HEADERS_VERSION%%.*}.x/linux-${LINUX_HEADERS_VERSION}.tar.gz" |
+    tar -C /usr/local/src/linux-headers -xz --strip-components=1
+  cd /usr/local/src/linux-headers
+  make -j "$(nproc)" \
+    headers_install \
+    INSTALL_HDR_PATH=/usr/local
+  cd /
+  rm -rf /usr/local/src/linux-headers
+RUN
+
+ARG BINUTILS_VERSION
+RUN <<RUN
+  set -eux
+  mkdir -p /usr/local/src/binutils
+  curl -fsSL "https://ftpmirror.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.gz" |
+    tar -C /usr/local/src/binutils -xz --strip-components=1
+  mkdir -p /tmp/binutils
+  cd /tmp/binutils
+  /usr/local/src/binutils/configure \
+    --prefix=/usr/local
+  make -j "$(nproc)"
+  make -j "$(nproc)" install
+  cd /
+  rm -rf /usr/local/src/binutils /tmp/binutils
+RUN

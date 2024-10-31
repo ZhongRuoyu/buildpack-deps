@@ -1,0 +1,103 @@
+# syntax=docker/dockerfile:1
+
+FROM zhongruoyu/buildpack-deps:base
+
+ARG ZLIB_VERSION
+RUN <<RUN
+  set -eux
+  mkdir -p /usr/local/src/zlib
+  curl -fsSL "https://zlib.net/zlib-${ZLIB_VERSION}.tar.gz" |
+    tar -C /usr/local/src/zlib -xz --strip-components=1
+  mkdir -p /tmp/zlib
+  cd /tmp/zlib
+  /usr/local/src/zlib/configure \
+    --prefix=/usr/local
+  make -j "$(nproc)"
+  make -j "$(nproc)" install
+  cd /
+  rm -rf /usr/local/src/zlib /tmp/zlib
+  ldconfig
+RUN
+
+ARG OPENSSL_VERSION
+RUN <<RUN
+  set -eux
+  mkdir -p /usr/local/src/openssl
+  curl -fsSL "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" |
+    tar -C /usr/local/src/openssl -xz --strip-components=1
+  mkdir -p /tmp/openssl
+  cd /tmp/openssl
+  /usr/local/src/openssl/config --prefix=/usr/local
+  make -j "$(nproc)"
+  make -j "$(nproc)" install
+  cd /
+  rm -rf /usr/local/src/openssl /tmp/openssl
+  ldconfig
+RUN
+
+ARG CURL_VERSION
+RUN <<RUN
+  set -eux
+  mkdir -p /usr/local/src/curl
+  curl -fsSL "https://curl.se/download/curl-${CURL_VERSION}.tar.gz" |
+    tar -C /usr/local/src/curl -xz --strip-components=1
+  mkdir -p /tmp/curl
+  cd /tmp/curl
+  /usr/local/src/curl/configure \
+    --prefix=/usr/local \
+    --with-openssl \
+    --without-libpsl
+  make -j "$(nproc)"
+  make -j "$(nproc)" install
+  cd /
+  rm -rf /usr/local/src/curl /tmp/curl
+  ldconfig
+RUN
+
+ARG GIT_VERSION
+RUN <<RUN
+  set -eux
+  mkdir -p /usr/local/src/git
+  curl -fsSL "https://www.kernel.org/pub/software/scm/git/git-${GIT_VERSION}.tar.gz" |
+    tar -C /usr/local/src/git -xz --strip-components=1
+  cd /usr/local/src/git
+  ./configure \
+    --prefix=/usr/local
+  make -j "$(nproc)"
+  make install
+  cd /
+  rm -rf /usr/local/src/git
+RUN
+
+ARG CMAKE_VERSION
+RUN <<RUN
+  set -eux
+  mkdir -p /usr/local/src/cmake
+  curl -fsSL "https://cmake.org/files/v${CMAKE_VERSION%.*}/cmake-${CMAKE_VERSION}.tar.gz" |
+    tar -C /usr/local/src/cmake -xz --strip-components=1
+  mkdir -p /tmp/cmake
+  cd /tmp/cmake
+  /usr/local/src/cmake/configure \
+    --prefix=/usr/local \
+    --parallel="$(nproc)"
+  make -j "$(nproc)"
+  make -j "$(nproc)" install
+  cd /
+  rm -rf /usr/local/src/cmake /tmp/cmake
+RUN
+
+ARG PYTHON_VERSION
+RUN <<RUN
+  set -eux
+  mkdir -p /usr/local/src/python
+  curl -fsSL "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz" |
+    tar -C /usr/local/src/python -xz --strip-components=1
+  mkdir -p /tmp/python
+  cd /tmp/python
+  /usr/local/src/python/configure \
+    --prefix=/usr/local
+  make -j "$(nproc)"
+  make -j "$(nproc)" install
+  cd /
+  rm -rf /usr/local/src/python /tmp/python
+RUN
