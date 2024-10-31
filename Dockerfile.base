@@ -80,6 +80,7 @@ RUN <<RUN
     /usr/local/src/gcc \
     /tmp/gcc
   ldconfig
+  ln -s /usr/local/bin/gcc /usr/local/bin/cc
 RUN
 
 ARG MAKE_VERSION
