@@ -13,7 +13,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  DOCKERHUB_REPOSITORY: zhongruoyu/buildpack-deps
   GCC_VERSION: "14.2.0"
   GCC_SHA256: "7d376d445f93126dc545e2c0086d0f647c3094aae081cdb78f42ce2bc25e7293"
   MAKE_VERSION: "4.4.1"
