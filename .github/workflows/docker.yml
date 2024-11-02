@@ -37,6 +37,11 @@ env:
 jobs:
   base:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - x86_64
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -49,7 +54,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           tags: zhongruoyu/buildpack-deps:base
-          file: Dockerfile.base
+          file: ${{ matrix.arch }}/Dockerfile.base
           build-args: |
             GCC_VERSION=${{ env.GCC_VERSION }}
             GCC_SHA256=${{ env.GCC_SHA256 }}
@@ -64,6 +69,11 @@ jobs:
   extended:
     needs: base
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - x86_64
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -76,7 +86,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           tags: zhongruoyu/buildpack-deps:extended
-          file: Dockerfile.extended
+          file: ${{ matrix.arch }}/Dockerfile.extended
           build-args: |
             ZLIB_VERSION=${{ env.ZLIB_VERSION }}
             ZLIB_SHA256=${{ env.ZLIB_SHA256 }}
