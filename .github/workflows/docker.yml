@@ -35,13 +35,19 @@ env:
   PYTHON_SHA256: "b8d79530e3b7c96a5cb2d40d431ddb512af4a563e863728d8713039aa50203f9"
 
 jobs:
-  base:
-    runs-on: ubuntu-latest
+  base-build:
     strategy:
       fail-fast: false
       matrix:
         arch:
           - x86_64
+          - aarch64
+        include:
+          - arch: x86_64
+            runs-on: ubuntu-latest
+          - arch: aarch64
+            runs-on: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runs-on }}
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -50,11 +56,12 @@ jobs:
         with:
           username: zhongruoyu
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and push Docker images
+      - name: Build and push Docker image by digest
+        id: build
         uses: docker/build-push-action@v6
         with:
-          tags: zhongruoyu/buildpack-deps:base
           file: ${{ matrix.arch }}/Dockerfile.base
+          platforms: linux/${{ matrix.arch }}
           build-args: |
             GCC_VERSION=${{ env.GCC_VERSION }}
             GCC_SHA256=${{ env.GCC_SHA256 }}
@@ -64,16 +71,58 @@ jobs:
             LINUX_HEADERS_SHA256=${{ env.LINUX_HEADERS_SHA256 }}
             BINUTILS_VERSION=${{ env.BINUTILS_VERSION }}
             BINUTILS_SHA256=${{ env.BINUTILS_SHA256 }}
-          push: true
+          outputs: type=image,name=zhongruoyu/buildpack-deps,name-canonical=true,push=true,push-by-digest=true
+      - name: Export digest
+        run: |
+          mkdir -p "$RUNNER_TEMP"/digests
+          echo "${DIGEST#sha256:}" > "$RUNNER_TEMP"/digests/"$ARCH"
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+          ARCH: ${{ matrix.arch }}
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-base-${{ matrix.arch }}
+          path: ${{ runner.temp }}/digests/*
 
-  extended:
-    needs: base
+  base-merge:
+    needs: base-build
     runs-on: ubuntu-latest
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: zhongruoyu
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digests-base-*
+          merge-multiple: true
+      - name: Create manifest list and push
+        run: |
+          docker buildx imagetools create \
+            --tag=zhongruoyu/buildpack-deps:base \
+            zhongruoyu/buildpack-deps@sha256:"$(cat "$RUNNER_TEMP"/digests/x86_64)" \
+            zhongruoyu/buildpack-deps@sha256:"$(cat "$RUNNER_TEMP"/digests/aarch64)"
+
+  extended-build:
+    needs: base-merge
     strategy:
       fail-fast: false
       matrix:
         arch:
           - x86_64
+          - aarch64
+        include:
+          - arch: x86_64
+            runs-on: ubuntu-latest
+          - arch: aarch64
+            runs-on: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runs-on }}
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -82,11 +131,12 @@ jobs:
         with:
           username: zhongruoyu
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and push Docker images
+      - name: Build and push Docker image by digest
+        id: build
         uses: docker/build-push-action@v6
         with:
-          tags: zhongruoyu/buildpack-deps:extended
           file: ${{ matrix.arch }}/Dockerfile.extended
+          platforms: linux/${{ matrix.arch }}
           build-args: |
             ZLIB_VERSION=${{ env.ZLIB_VERSION }}
             ZLIB_SHA256=${{ env.ZLIB_SHA256 }}
@@ -100,4 +150,40 @@ jobs:
             CMAKE_SHA256=${{ env.CMAKE_SHA256 }}
             PYTHON_VERSION=${{ env.PYTHON_VERSION }}
             PYTHON_SHA256=${{ env.PYTHON_SHA256 }}
-          push: true
+          outputs: type=image,name=zhongruoyu/buildpack-deps,name-canonical=true,push=true,push-by-digest=true
+      - name: Export digest
+        run: |
+          mkdir -p "$RUNNER_TEMP"/digests
+          echo "${DIGEST#sha256:}" > "$RUNNER_TEMP"/digests/"$ARCH"
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+          ARCH: ${{ matrix.arch }}
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-extended-${{ matrix.arch }}
+          path: ${{ runner.temp }}/digests/*
+
+  extended-merge:
+    needs: extended-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: zhongruoyu
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digests-extended-*
+          merge-multiple: true
+      - name: Create manifest list and push
+        run: |
+          docker buildx imagetools create \
+            --tag=zhongruoyu/buildpack-deps:extended \
+            zhongruoyu/buildpack-deps:extended@sha256:"$(cat "$RUNNER_TEMP"/digests/x86_64)" \
+            zhongruoyu/buildpack-deps:extended@sha256:"$(cat "$RUNNER_TEMP"/digests/aarch64)"
