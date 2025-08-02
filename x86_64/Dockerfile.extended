@@ -100,8 +100,10 @@ RUN <<RUN
   cd /usr/local/src/git
   ./configure \
     --prefix=/usr/local
-  make -j "$(nproc)"
-  make install
+  make -j "$(nproc)" \
+    CSPRNG_METHOD=openssl
+  make -j "$(nproc)" install \
+    CSPRNG_METHOD=openssl
   cd /
   rm -rf \
     "/tmp/git-${GIT_VERSION}.tar.gz" \
