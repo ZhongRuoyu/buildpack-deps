@@ -16,14 +16,6 @@ RUN <<RUN
 RUN
 
 RUN <<RUN
-  {
-    echo '/usr/local/lib'
-    echo '/usr/local/lib64'
-  } > /etc/ld.so.conf.d/00-local-lib.conf
-  ldconfig
-RUN
-
-RUN <<RUN
   set -eux
   mkdir -p /usr/local/src/gcc-9
   curl -fsSL "https://ftpmirror.gnu.org/gnu/gcc/gcc-9.5.0/gcc-9.5.0.tar.gz" \
