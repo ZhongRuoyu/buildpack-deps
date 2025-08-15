@@ -10,13 +10,12 @@ including legacy ones.
 The pre-built images are available on Docker Hub as
 [`zhongruoyu/buildpack-deps`](https://hub.docker.com/r/zhongruoyu/buildpack-deps).
 
-Currently, only x86_64 images are pre-built and published.
-They are based on the `debian/eol:wheezy` image, which provides glibc 2.13.
+The x86_64 images are based on the `debian/eol:wheezy` image, which provides
+glibc 2.13.
 This version of glibc is compatible with most legacy systems that are still in
 use today.
 
-AArch64 images are provided as well, but they are not pre-built.
-They are based on the `centos:7` image, which provides glibc 2.17.
+The AArch64 images are based on the `centos:7` image, which provides glibc 2.17.
 This version of glibc is the first that supports AArch64.
 
 Two tags are provided: `base` and `extended`.
