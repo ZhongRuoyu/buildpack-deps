@@ -28,7 +28,6 @@ RUN <<RUN
     "/tmp/zlib-${ZLIB_VERSION}.tar.gz" \
     /usr/local/src/zlib \
     /tmp/zlib
-  ldconfig
 RUN
 
 ARG OPENSSL_VERSION
@@ -54,7 +53,6 @@ RUN <<RUN
     "/tmp/openssl-${OPENSSL_VERSION}.tar.gz" \
     /usr/local/src/openssl \
     /tmp/openssl
-  ldconfig
 RUN
 
 ARG CURL_VERSION
@@ -83,7 +81,6 @@ RUN <<RUN
     "/tmp/curl-${CURL_VERSION}.tar.gz" \
     /usr/local/src/curl \
     /tmp/curl
-  ldconfig
 RUN
 
 ARG GIT_VERSION

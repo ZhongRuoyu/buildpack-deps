@@ -74,7 +74,6 @@ RUN <<RUN
     "/tmp/gcc-${GCC_VERSION}.tar.gz" \
     /usr/local/src/gcc \
     /tmp/gcc
-  ldconfig
   ln -s /usr/local/bin/gcc /usr/local/bin/cc
 RUN
 
