@@ -36,7 +36,8 @@ ARG OPENSSL_SHA256
 RUN <<RUN
   set -eux
   yum install -y \
-    perl-IPC-Cmd
+    perl-IPC-Cmd \
+    perl-Time-Piece
   yum clean all
   mkdir -p /usr/local/src/openssl
   curl -fsSL "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" \
