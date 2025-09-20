@@ -35,7 +35,7 @@ RUN <<RUN
     --enable-languages=c,c++ \
     --disable-multilib
   make -j "$(nproc)"
-  make -j "$(nproc)" install
+  make -j "$(nproc)" install-strip
   cd /
   rm -rf \
     "/tmp/gcc-9.5.0.tar.gz" \
@@ -68,7 +68,7 @@ RUN <<RUN
     --enable-languages=c,c++ \
     --disable-multilib
   make -j "$(nproc)"
-  make -j "$(nproc)" install
+  make -j "$(nproc)" install-strip
   cd /
   rm -rf \
     "/tmp/gcc-${GCC_VERSION}.tar.gz" \
@@ -95,7 +95,7 @@ RUN <<RUN
   /usr/local/src/make/configure \
     --prefix=/usr/local
   make -j "$(nproc)"
-  make -j "$(nproc)" install
+  make -j "$(nproc)" install-strip
   cd /
   rm -rf \
     "/tmp/make-${MAKE_VERSION}.tar.gz" \
@@ -148,7 +148,7 @@ RUN <<RUN
   /usr/local/src/binutils/configure \
     --prefix=/usr/local
   make -j "$(nproc)"
-  make -j "$(nproc)" install
+  make -j "$(nproc)" install-strip
   cd /
   rm -rf \
     "/tmp/binutils-${BINUTILS_VERSION}.tar.gz" \
