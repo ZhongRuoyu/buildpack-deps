@@ -2,7 +2,7 @@
 
 FROM zhongruoyu/buildpack-deps:base
 
-ARG LDFLAGS="-Wl,-rpath,/usr/local/lib -Wl,-rpath,/usr/local/lib64"
+ARG LDFLAGS="-Wl,-rpath,/usr/local/lib64 -Wl,-rpath,/usr/local/lib"
 
 ARG ZLIB_VERSION
 ARG ZLIB_SHA256
