@@ -136,6 +136,7 @@ RUN <<RUN
     /tmp/cmake
 RUN
 
+COPY patches/python /usr/local/src/python/patches
 ARG PYTHON_VERSION
 ARG PYTHON_SHA256
 RUN <<RUN
@@ -149,6 +150,13 @@ RUN <<RUN
     -C /usr/local/src/python \
     -xzf "/tmp/python-${PYTHON_VERSION}.tgz" \
     --strip-components=1
+  for patch in \
+    gh-139307 \
+    gh-139370 \
+  ; do
+    patch -d /usr/local/src/python -p1 \
+      < "/usr/local/src/python/patches/${patch}.patch"
+  done
   mkdir -p /tmp/python
   cd /tmp/python
   /usr/local/src/python/configure \

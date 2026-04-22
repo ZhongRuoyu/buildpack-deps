@@ -1,0 +1,40 @@
+diff --git a/Modules/_hacl/include/krml/internal/target.h b/Modules/_hacl/include/krml/internal/target.h
+index 73555ab5ca19a430c6116e2fb3c3624230587720..c68b78ab76eb121a5c505b348c71189ecc7f77bc 100644
+--- a/Modules/_hacl/include/krml/internal/target.h
++++ b/Modules/_hacl/include/krml/internal/target.h
+@@ -36,6 +36,17 @@ typedef double float64_t;
+ #endif
+ #endif
+ 
++/* There is no support for aligned_alloc() in glibc before 2.16 either, so let's
++ * do the same check for glibc versions. */
++#ifdef __GLIBC__
++#  if (__GLIBC__ < 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 16)
++#    include <mm_malloc.h>
++#    define LEGACY_GLIBC
++#  else
++#    undef LEGACY_GLIBC
++#  endif
++#endif
++
+ /******************************************************************************/
+ /* Macros that KaRaMeL will generate.                                         */
+ /******************************************************************************/
+@@ -150,7 +161,7 @@ typedef double float64_t;
+       defined(_MSC_VER) ||                                                     \
+       (defined(__MINGW32__) && defined(__MINGW64_VERSION_MAJOR)))
+ #    define KRML_ALIGNED_MALLOC(X, Y) _aligned_malloc(Y, X)
+-#  elif defined(LEGACY_MACOS)
++#  elif defined(LEGACY_MACOS) || defined(LEGACY_GLIBC)
+ #    define KRML_ALIGNED_MALLOC(X, Y) _mm_malloc(Y, X)
+ #  else
+ #    define KRML_ALIGNED_MALLOC(X, Y) aligned_alloc(X, Y)
+@@ -169,7 +180,7 @@ typedef double float64_t;
+       defined(_MSC_VER) ||                                                     \
+       (defined(__MINGW32__) && defined(__MINGW64_VERSION_MAJOR)))
+ #    define KRML_ALIGNED_FREE(X) _aligned_free(X)
+-#  elif defined(LEGACY_MACOS)
++#  elif defined(LEGACY_MACOS) || defined(LEGACY_GLIBC)
+ #    define KRML_ALIGNED_FREE(X) _mm_free(X)
+ #  else
+ #    define KRML_ALIGNED_FREE(X) free(X)
