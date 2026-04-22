@@ -153,6 +153,7 @@ RUN <<RUN
   for patch in \
     gh-139307 \
     gh-139370 \
+    gh-146217 \
   ; do
     patch -d /usr/local/src/python -p1 \
       < "/usr/local/src/python/patches/${patch}.patch"
