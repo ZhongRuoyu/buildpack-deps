@@ -13,6 +13,7 @@ env:
   DOCKERHUB_REPOSITORY: zhongruoyu/buildpack-deps
   GHCR_USERNAME: zhongruoyu
   GHCR_REPOSITORY: ghcr.io/zhongruoyu/buildpack-deps
+  CACHE_REPOSITORY: ghcr.io/zhongruoyu/buildpack-deps-cache
 
 jobs:
   build:
@@ -33,29 +34,31 @@ jobs:
       packages: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Load build environment
         run: cat build.env >> "$GITHUB_ENV"
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
       - name: Login to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ env.GHCR_USERNAME }}
           password: ${{ github.token }}
       - name: Build and push Docker image by digest
         id: build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           file: ${{ matrix.arch }}/Dockerfile.${{ inputs.tag }}
           platforms: linux/${{ matrix.arch }}
           build-args: ${{ inputs.build-args }}
+          cache-from: type=registry,ref=${{ env.CACHE_REPOSITORY }}:${{ inputs.tag }}-${{ matrix.arch }}
+          cache-to: type=registry,ref=${{ env.CACHE_REPOSITORY }}:${{ inputs.tag }}-${{ matrix.arch }},mode=max
           outputs: |
             type=image,name=${{ env.DOCKERHUB_REPOSITORY }},name-canonical=true,push=true,push-by-digest=true
             type=image,name=${{ env.GHCR_REPOSITORY }},name-canonical=true,push=true,push-by-digest=true
@@ -67,7 +70,7 @@ jobs:
           DIGEST: ${{ steps.build.outputs.digest }}
           ARCH: ${{ matrix.arch }}
       - name: Upload digest
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: digests-${{ inputs.tag }}-${{ matrix.arch }}
           path: ${{ runner.temp }}/digests/*
@@ -80,20 +83,20 @@ jobs:
       packages: write
     steps:
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
       - name: Login to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ env.GHCR_USERNAME }}
           password: ${{ github.token }}
       - name: Download digests
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           path: ${{ runner.temp }}/digests
           pattern: digests-${{ inputs.tag }}-*
