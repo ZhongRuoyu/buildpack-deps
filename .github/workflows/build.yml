@@ -13,7 +13,7 @@ env:
   DOCKERHUB_REPOSITORY: zhongruoyu/buildpack-deps
   GHCR_USERNAME: zhongruoyu
   GHCR_REPOSITORY: ghcr.io/zhongruoyu/buildpack-deps
-  CACHE_REPOSITORY: ghcr.io/zhongruoyu/buildpack-deps-cache
+  CACHE_REPOSITORY: ghcr.io/zhongruoyu/buildpack-deps/cache
 
 jobs:
   build:
