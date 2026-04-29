@@ -7,13 +7,15 @@ on:
         type: string
       build-args:
         type: string
+      push:
+        type: boolean
 
 env:
   DOCKERHUB_USERNAME: zhongruoyu
   DOCKERHUB_REPOSITORY: zhongruoyu/buildpack-deps
   GHCR_USERNAME: zhongruoyu
   GHCR_REPOSITORY: ghcr.io/zhongruoyu/buildpack-deps
-  CACHE_REPOSITORY: ghcr.io/zhongruoyu/buildpack-deps/cache
+  BUILD_CACHE_REPOSITORY: ghcr.io/zhongruoyu/buildpack-deps/cache
 
 jobs:
   build:
@@ -42,16 +44,38 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
       - name: Login to Docker Hub
+        if: inputs.push
         uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Login to GitHub Container Registry
+        if: inputs.push
         uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           registry: ghcr.io
           username: ${{ env.GHCR_USERNAME }}
           password: ${{ github.token }}
+      - name: Set up build
+        id: setup
+        run: |
+          {
+            echo "cache_from=type=registry,ref=$BUILD_CACHE_REPOSITORY:$TAG-$ARCH"
+            if [[ "$PUSH" = true ]]; then
+              echo "cache_to=type=registry,ref=$BUILD_CACHE_REPOSITORY:$TAG-$ARCH,mode=max"
+              echo "outputs<<OUTPUTS"
+              echo "type=image,name=$DOCKERHUB_REPOSITORY,name-canonical=true,push=true,push-by-digest=true"
+              echo "type=image,name=$GHCR_REPOSITORY,name-canonical=true,push=true,push-by-digest=true"
+              echo "OUTPUTS"
+            else
+              echo "cache_to="
+              echo "outputs="
+            fi
+          } >> "$GITHUB_OUTPUT"
+        env:
+          PUSH: ${{ inputs.push }}
+          TAG: ${{ inputs.tag }}
+          ARCH: ${{ matrix.arch }}
       - name: Build and push Docker image by digest
         id: build
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
@@ -59,11 +83,9 @@ jobs:
           file: ${{ matrix.arch }}/Dockerfile.${{ inputs.tag }}
           platforms: linux/${{ matrix.arch }}
           build-args: ${{ inputs.build-args }}
-          cache-from: type=registry,ref=${{ env.CACHE_REPOSITORY }}:${{ inputs.tag }}-${{ matrix.arch }}
-          cache-to: type=registry,ref=${{ env.CACHE_REPOSITORY }}:${{ inputs.tag }}-${{ matrix.arch }},mode=max
-          outputs: |
-            type=image,name=${{ env.DOCKERHUB_REPOSITORY }},name-canonical=true,push=true,push-by-digest=true
-            type=image,name=${{ env.GHCR_REPOSITORY }},name-canonical=true,push=true,push-by-digest=true
+          cache-from: ${{ steps.setup.outputs.cache_from }}
+          cache-to: ${{ steps.setup.outputs.cache_to }}
+          outputs: ${{ steps.setup.outputs.outputs }}
       - name: Export digest
         run: |
           mkdir -p "$RUNNER_TEMP"/digests
@@ -78,6 +100,7 @@ jobs:
           path: ${{ runner.temp }}/digests/*
 
   merge:
+    if: inputs.push
     needs: build
     runs-on: ubuntu-latest
     permissions:

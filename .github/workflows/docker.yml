@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
   schedule:
     - cron: "0 0 1 * *"
   workflow_dispatch:
@@ -30,6 +33,7 @@ jobs:
         LINUX_HEADERS_SHA256
         BINUTILS_VERSION
         BINUTILS_SHA256
+      push: ${{ github.ref_name == 'main' }}
 
   extended:
     needs: base
@@ -53,3 +57,4 @@ jobs:
         CMAKE_SHA256
         PYTHON_VERSION
         PYTHON_SHA256
+      push: ${{ github.ref_name == 'main' }}
