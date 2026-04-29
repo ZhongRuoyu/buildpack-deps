@@ -35,7 +35,7 @@ The `extended`-tagged image contains, in addition to the tools above:
 | -------------- | ------- |
 | zlib           | 1.3.2   |
 | OpenSSL        | 4.0.0   |
-| curl           | 8.19.0  |
+| curl           | 8.20.0  |
 | Git            | 2.54.0  |
 | CMake          | 4.3.2   |
 | Python         | 3.14.4  |
