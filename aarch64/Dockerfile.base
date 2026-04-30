@@ -47,6 +47,7 @@ RUN <<RUN
     /tmp/gcc-9
 RUN
 
+COPY patches/gcc /usr/local/src/gcc/patches
 ARG GCC_VERSION
 ARG GCC_SHA256
 RUN <<RUN
@@ -61,6 +62,11 @@ RUN <<RUN
     -xzf "/tmp/gcc-${GCC_VERSION}.tar.gz" \
     --strip-components=1
   cd /usr/local/src/gcc
+  for patch in \
+    doc-makeinfo-4.13 \
+  ; do
+    patch -p1 < "patches/${patch}.patch"
+  done
   ./contrib/download_prerequisites
   mkdir -p /tmp/gcc
   cd /tmp/gcc

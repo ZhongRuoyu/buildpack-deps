@@ -24,7 +24,7 @@ The `base`-tagged image contains the basic tools, including:
 
 | Tool / Library       | Version |
 | -------------------- | ------- |
-| GCC                  | 15.2.0  |
+| GCC                  | 16.1.0  |
 | GNU Make             | 4.4.1   |
 | Linux kernel headers | 6.18.26 |
 | GNU Binutils         | 2.46.0  |
