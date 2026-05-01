@@ -8,7 +8,9 @@ including legacy ones.
 ## Images
 
 The pre-built images are available on Docker Hub as
-[`zhongruoyu/buildpack-deps`](https://hub.docker.com/r/zhongruoyu/buildpack-deps).
+[`zhongruoyu/buildpack-deps`](https://hub.docker.com/r/zhongruoyu/buildpack-deps)
+and on GitHub Container Registry as
+[`ghcr.io/zhongruoyu/buildpack-deps`](https://ghcr.io/zhongruoyu/buildpack-deps).
 
 The x86_64 images are based on the `debian/eol:wheezy` image, which provides
 glibc 2.13.
