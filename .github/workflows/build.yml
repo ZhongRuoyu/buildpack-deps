@@ -10,6 +10,10 @@ on:
       push:
         type: boolean
 
+defaults:
+  run:
+    shell: bash -euxo pipefail {0}
+
 env:
   DOCKERHUB_USERNAME: zhongruoyu
   DOCKERHUB_REPOSITORY: zhongruoyu/buildpack-deps
