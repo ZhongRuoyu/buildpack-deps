@@ -18,7 +18,26 @@ env:
   BUILD_CACHE_REPOSITORY: ghcr.io/zhongruoyu/buildpack-deps/cache
 
 jobs:
+  metadata:
+    runs-on: ubuntu-latest
+    outputs:
+      tags: ${{ steps.metadata.outputs.tags }}
+      labels: ${{ steps.metadata.outputs.labels }}
+    steps:
+      - name: Determine metadata
+        id: metadata
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6.0.0
+        with:
+          images: |
+            ${{ env.DOCKERHUB_REPOSITORY }}
+            ${{ env.GHCR_REPOSITORY }}
+          flavor: |
+            latest=false
+          tags: |
+            ${{ inputs.tag }}
+
   build:
+    needs: metadata
     strategy:
       fail-fast: false
       matrix:
@@ -82,6 +101,7 @@ jobs:
         with:
           file: ${{ matrix.arch }}/Dockerfile.${{ inputs.tag }}
           platforms: linux/${{ matrix.arch }}
+          labels: ${{ needs.metadata.outputs.labels }}
           build-args: ${{ inputs.build-args }}
           cache-from: ${{ steps.setup.outputs.cache_from }}
           cache-to: ${{ steps.setup.outputs.cache_to }}
@@ -101,7 +121,7 @@ jobs:
 
   merge:
     if: inputs.push
-    needs: build
+    needs: [metadata, build]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -128,10 +148,15 @@ jobs:
           merge-multiple: true
       - name: Create manifest list and push
         run: |
-          docker buildx imagetools create \
-            --tag="$DOCKERHUB_REPOSITORY:$TAG" \
-            --tag="$GHCR_REPOSITORY:$TAG" \
-            "$GHCR_REPOSITORY@sha256:$(cat "$RUNNER_TEMP"/digests/x86_64)" \
+          mapfile -t tags <<< "$TAGS"
+          tag_args=()
+          for tag in "${tags[@]}"; do
+            tag_args+=(--tag="$tag")
+          done
+          images=(
+            "$GHCR_REPOSITORY@sha256:$(cat "$RUNNER_TEMP"/digests/x86_64)"
             "$GHCR_REPOSITORY@sha256:$(cat "$RUNNER_TEMP"/digests/aarch64)"
+          )
+          docker buildx imagetools create "${tag_args[@]}" "${images[@]}"
         env:
-          TAG: ${{ inputs.tag }}
+          TAGS: ${{ needs.metadata.outputs.tags }}
