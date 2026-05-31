@@ -15,13 +15,21 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions: {}
+
+defaults:
+  run:
+    shell: bash -euxo pipefail {0}
+
 jobs:
   base:
-    uses: ./.github/workflows/build.yml
-    secrets: inherit
+    name: Build base image
+    uses: ./.github/workflows/docker-build.yml
+    secrets:
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     permissions:
       contents: read
-      packages: write
+      packages: write # for pushing image and cache
     with:
       tag: base
       build-args: |
@@ -36,12 +44,14 @@ jobs:
       push: ${{ github.ref == 'refs/heads/main' }}
 
   extended:
+    name: Build extended image
     needs: base
-    uses: ./.github/workflows/build.yml
-    secrets: inherit
+    uses: ./.github/workflows/docker-build.yml
+    secrets:
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     permissions:
       contents: read
-      packages: write
+      packages: write # for pushing image and cache
     with:
       tag: extended
       build-args: |
