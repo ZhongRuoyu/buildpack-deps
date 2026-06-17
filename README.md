@@ -40,7 +40,7 @@ The `extended`-tagged image contains, in addition to the tools above:
 | curl           | 8.20.0  |
 | Git            | 2.54.0  |
 | CMake          | 4.3.3   |
-| Python         | 3.14.5  |
+| Python         | 3.14.6  |
 
 ## License
 
