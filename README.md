@@ -39,7 +39,7 @@ The `extended`-tagged image contains, in addition to the tools above:
 | OpenSSL        | 4.0.1   |
 | curl           | 8.21.0  |
 | Git            | 2.55.0  |
-| CMake          | 4.3.3   |
+| CMake          | 4.4.0   |
 | Python         | 3.14.6  |
 
 ## License

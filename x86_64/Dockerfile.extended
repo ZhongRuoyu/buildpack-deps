@@ -111,6 +111,7 @@ RUN <<RUN
     /usr/local/src/git
 RUN
 
+COPY patches/cmake /usr/local/src/cmake/patches
 ARG CMAKE_VERSION
 ARG CMAKE_SHA256
 RUN <<RUN
@@ -124,6 +125,12 @@ RUN <<RUN
     -C /usr/local/src/cmake \
     -xzf "/tmp/cmake-${CMAKE_VERSION}.tar.gz" \
     --strip-components=1
+  cd /usr/local/src/cmake
+  for patch in \
+    libuv-glibc-2.13 \
+  ; do
+    patch -p1 < "patches/${patch}.patch"
+  done
   mkdir -p /tmp/cmake
   cd /tmp/cmake
   /usr/local/src/cmake/configure \
