@@ -29,7 +29,7 @@ The `base`-tagged image contains the basic tools, including:
 | GCC                  | 16.1.0  |
 | GNU Make             | 4.4.1   |
 | Linux kernel headers | 7.1.5   |
-| GNU Binutils         | 2.46.1  |
+| GNU Binutils         | 2.47    |
 
 The `extended`-tagged image contains, in addition to the tools above:
 
