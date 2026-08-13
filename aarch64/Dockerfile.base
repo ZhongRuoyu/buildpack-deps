@@ -22,7 +22,7 @@ RUN
 RUN <<RUN
   set -eux
   mkdir -p /usr/local/src/gcc-9
-  curl -fsSL "https://ftpmirror.gnu.org/gnu/gcc/gcc-9.5.0/gcc-9.5.0.tar.gz" \
+  curl -fsSL "https://ftp.gnu.org/gnu/gcc/gcc-9.5.0/gcc-9.5.0.tar.gz" \
     -o "/tmp/gcc-9.5.0.tar.gz"
   echo "15b34072105272a3eb37f6927409f7ce9aa0dd1498efebc35f851d6e6f029a4d  /tmp/gcc-9.5.0.tar.gz" |
     sha256sum -c
@@ -53,7 +53,7 @@ ARG GCC_SHA256
 RUN <<RUN
   set -eux
   mkdir -p /usr/local/src/gcc
-  curl -fsSL "https://ftpmirror.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.gz" \
+  curl -fsSL "https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.gz" \
     -o "/tmp/gcc-${GCC_VERSION}.tar.gz"
   echo "${GCC_SHA256}  /tmp/gcc-${GCC_VERSION}.tar.gz" |
     sha256sum -c
@@ -92,7 +92,7 @@ ARG MAKE_SHA256
 RUN <<RUN
   set -eux
   mkdir -p /usr/local/src/make
-  curl -fsSL "https://ftpmirror.gnu.org/gnu/make/make-${MAKE_VERSION}.tar.gz" \
+  curl -fsSL "https://ftp.gnu.org/gnu/make/make-${MAKE_VERSION}.tar.gz" \
     -o "/tmp/make-${MAKE_VERSION}.tar.gz"
   echo "${MAKE_SHA256}  /tmp/make-${MAKE_VERSION}.tar.gz" |
     sha256sum -c
@@ -144,7 +144,7 @@ ARG BINUTILS_SHA256
 RUN <<RUN
   set -eux
   mkdir -p /usr/local/src/binutils
-  curl -fsSL "https://ftpmirror.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.gz" \
+  curl -fsSL "https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.gz" \
     -o "/tmp/binutils-${BINUTILS_VERSION}.tar.gz"
   echo "${BINUTILS_SHA256}  /tmp/binutils-${BINUTILS_VERSION}.tar.gz" |
     sha256sum -c
