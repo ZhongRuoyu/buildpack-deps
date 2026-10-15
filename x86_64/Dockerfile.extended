@@ -161,9 +161,7 @@ RUN <<RUN
     --strip-components=1
   cd /usr/local/src/python
   for patch in \
-    gh-139307 \
     gh-139370 \
-    gh-146217 \
   ; do
     patch -p1 < "patches/${patch}.patch"
   done
