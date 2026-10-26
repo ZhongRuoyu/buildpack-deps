@@ -162,6 +162,7 @@ RUN <<RUN
   cd /usr/local/src/python
   for patch in \
     gh-139370 \
+    gh-160376-static_assert \
   ; do
     patch -p1 < "patches/${patch}.patch"
   done
